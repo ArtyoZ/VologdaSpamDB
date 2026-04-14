@@ -1,0 +1,33 @@
+name: Add span number
+
+on:
+  workflow_dispatch:
+    inputs:
+      phone_number:
+        description: 'The spam phone number to append'
+        required: true
+        type: string
+
+jobs:
+  add-number:
+    runs-on: github
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Append number to CSV
+        run: |
+          echo "${{ inputs.phone_number }}" >> VologdaSpamDB.csv
+          # Optional: sort or remove duplicates if you want
+          # sort -u VologdaSpamDB.csv -o VologdaSpamDB.csv
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "my@bot.com"
+          git add VologdaSpamDB.csv
+          git commit -m "Add spam phone number: ${{ inputs.phone_number }}" || echo "No changes to commit"
+          git push
