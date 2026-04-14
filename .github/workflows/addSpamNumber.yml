@@ -1,4 +1,4 @@
-name: Add span number
+name: Add spam number
 
 on:
   workflow_dispatch:
