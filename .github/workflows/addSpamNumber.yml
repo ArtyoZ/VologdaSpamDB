@@ -22,7 +22,7 @@ jobs:
         run: |
           echo "${{ inputs.phone_number }}" >> VologdaSpamDB.csv
           # Optional: sort or remove duplicates if you want
-          sort -u VologdaSpamDB.csv -o VologdaSpamDB.csv
+          # sort -u VologdaSpamDB.csv -o VologdaSpamDB.csv
 
       - name: Commit and push
         run: |
