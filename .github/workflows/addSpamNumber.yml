@@ -10,7 +10,7 @@ on:
 
 jobs:
   add-number:
-    runs-on: github
+    runs-on: ubuntu-latest
     permissions:
       contents: write
 
