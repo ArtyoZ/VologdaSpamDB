@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       phone_number:
-        description: 'The spam phone number to append'
+        description: 'The spam phone number to append (e.g. +78202519863)'
         required: true
         type: string
 
@@ -18,34 +18,38 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Append number to CSV if not exists and sort
+      - name: Process, append and sort
         run: |
-          # 1. Очищаем ввод от лишних пробелов по краям (trim)
+          # Убираем случайные пробелы по краям
           PHONE=$(echo "${{ inputs.phone_number }}" | xargs)
 
-          # 2. Нормализуем файл: удаляем Windows-окончания строк (\r), если они есть
+          # Если пользователь ввел номер без плюса, автоматически добавляем его
+          #if [[ "$PHONE" != +* ]]; then
+          #  PHONE="+$PHONE"
+          #fi
+
+          # Удаляем Windows-окончания строк (\r), чтобы grep работал корректно
           sed -i 's/\r$//' VologdaSpamDB.csv
 
+          # Проверяем точное совпадение строки
           if grep -qxF "$PHONE" VologdaSpamDB.csv; then
-            echo "Number '$PHONE' already exists, skipping."
+            echo "Number '$PHONE' already exists in the database. Skipping."
           else
-            # Добавляем новый номер в конец файла
+            echo "Adding '$PHONE' to the database..."
             echo "$PHONE" >> VologdaSpamDB.csv
 
-            # Сохраняем заголовок (первую строку) во временный файл
-            head -n 1 VologdaSpamDB.csv > tmp.csv
-
-            # Берём все строки кроме заголовка, сортируем их и дописываем
-            tail -n +2 VologdaSpamDB.csv | sort -V >> tmp.csv
-
-            # Заменяем исходный файл отсортированным
+            # Сохраняем заголовок 'pattern', а всё остальное сортируем. 
+            # Флаг -u (unique) дополнительно удалит любые старые дубликаты из файла.
+            (head -n 1 VologdaSpamDB.csv && tail -n +2 VologdaSpamDB.csv | sort -u) > tmp.csv
             mv tmp.csv VologdaSpamDB.csv
           fi
 
       - name: Commit and push
         run: |
           git config user.name "github-actions[bot]"
-          git config user.email "my@bot.com"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           git add VologdaSpamDB.csv
-          git commit -m "Add spam phone number: ${{ inputs.phone_number }}" || echo "No changes to commit"
+          
+          # Если изменений нет (номер уже был), commit не выполнится, пайплайн не упадет благодаря || echo
+          git commit -m "Add spam pattern: ${{ inputs.phone_number }}" || echo "No changes to commit"
           git push
