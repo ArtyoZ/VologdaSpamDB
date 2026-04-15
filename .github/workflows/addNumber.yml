@@ -7,6 +7,10 @@ on:
         description: 'The spam phone number to add'
         required: true
         type: string
+      spam_category:
+        description: 'The category of spam'
+        required: false
+        type: string
 
 jobs:
   add-number:
@@ -51,5 +55,5 @@ jobs:
           git add VologdaSpamDB.csv
           
           # Если изменений нет (номер уже был), commit не выполнится, пайплайн не упадет благодаря || echo
-          git commit -m "Add number: ${{ inputs.phone_number }}" || echo "No changes to commit"
+          git commit -m "Add number: ${{ inputs.phone_number }} (Category: ${{ inputs.spam_category }})" || echo "No changes to commit"
           git push
