@@ -18,11 +18,23 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Append number to CSV
+      - name: Append number to CSV if not exists and sort
         run: |
-          echo "${{ inputs.phone_number }}" >> VologdaSpamDB.csv
-          # Optional: sort or remove duplicates if you want
-          # sort -u VologdaSpamDB.csv -o VologdaSpamDB.csv
+          if grep -qxF "${{ inputs.phone_number }}" VologdaSpamDB.csv; then
+            echo "Number already exists, skipping."
+          else
+            # Добавляем новый номер в конец файла
+            echo "${{ inputs.phone_number }}" >> VologdaSpamDB.csv
+
+            # Сохраняем заголовок (первую строку) во временный файл
+            head -n 1 VologdaSpamDB.csv > tmp.csv
+
+            # Берём все строки кроме заголовка, сортируем их и дописываем
+            tail -n +2 VologdaSpamDB.csv | sort -V >> tmp.csv
+
+            # Заменяем исходный файл отсортированным
+            mv tmp.csv VologdaSpamDB.csv
+          fi
 
       - name: Commit and push
         run: |
