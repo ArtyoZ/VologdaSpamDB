@@ -51,5 +51,5 @@ jobs:
           git add VologdaSpamDB.csv
           
           # Если изменений нет (номер уже был), commit не выполнится, пайплайн не упадет благодаря || echo
-          git commit -m "Add spam pattern: ${{ inputs.phone_number }}" || echo "No changes to commit"
+          git commit -m "Add spam number: ${{ inputs.phone_number }}" || echo "No changes to commit"
           git push
