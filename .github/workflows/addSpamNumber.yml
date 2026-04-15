@@ -1,10 +1,10 @@
-name: Add spam number
+name: Add spam phone number
 
 on:
   workflow_dispatch:
     inputs:
       phone_number:
-        description: 'The spam phone number to append'
+        description: 'The spam phone number to add'
         required: true
         type: string
 
@@ -51,5 +51,5 @@ jobs:
           git add VologdaSpamDB.csv
           
           # Если изменений нет (номер уже был), commit не выполнится, пайплайн не упадет благодаря || echo
-          git commit -m "Add spam number: ${{ inputs.phone_number }}" || echo "No changes to commit"
+          git commit -m "Add number: ${{ inputs.phone_number }}" || echo "No changes to commit"
           git push
