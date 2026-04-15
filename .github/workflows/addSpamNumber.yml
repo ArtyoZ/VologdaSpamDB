@@ -1,5 +1,3 @@
-Почему не работает проверка на дубликаты? Номер, кторый уже есть в CSV, все равно добавляется.
-
 name: Add spam number
 
 on:
@@ -22,17 +20,11 @@ jobs:
 
       - name: Append number to CSV if not exists and sort
         run: |
-          # 1. Очищаем ввод от лишних пробелов по краям (trim)
-          PHONE=$(echo "${{ inputs.phone_number }}" | xargs)
-
-          # 2. Нормализуем файл: удаляем Windows-окончания строк (\r), если они есть
-          sed -i 's/\r$//' VologdaSpamDB.csv
-
-          if grep -qxF "$PHONE" VologdaSpamDB.csv; then
-            echo "Number '$PHONE' already exists, skipping."
+          if grep -qxF "${{ inputs.phone_number }}" VologdaSpamDB.csv; then
+            echo "Number already exists, skipping."
           else
             # Добавляем новый номер в конец файла
-            echo "$PHONE" >> VologdaSpamDB.csv
+            echo "${{ inputs.phone_number }}" >> VologdaSpamDB.csv
 
             # Сохраняем заголовок (первую строку) во временный файл
             head -n 1 VologdaSpamDB.csv > tmp.csv
