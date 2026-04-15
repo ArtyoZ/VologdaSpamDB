@@ -20,22 +20,25 @@ jobs:
 
       - name: Append number to CSV if not exists and sort
         run: |
-          if grep -qxF "${{ inputs.phone_number }}" VologdaSpamDB.csv; then
-            echo "Number already exists, skipping."
-          else
-            # Добавляем новый номер в конец файла
-            echo "${{ inputs.phone_number }}" >> VologdaSpamDB.csv
+          # Нормализуем файл: удаляем \r (CR) в конце строк (Windows → Unix)
+    sed -i 's/\r$//' VologdaSpamDB.csv
 
-            # Сохраняем заголовок (первую строку) во временный файл
-            head -n 1 VologdaSpamDB.csv > tmp.csv
+    # Очищаем ввод от пробельных символов
+    NUMBER=$(echo "${{ inputs.phone_number }}" | xargs)
+    echo "Checking for number: [$NUMBER]"
 
-            # Берём все строки кроме заголовка, сортируем их и дописываем
-            tail -n +2 VologdaSpamDB.csv | sort -V >> tmp.csv
+    if grep -qxF "$NUMBER" VologdaSpamDB.csv; then
+      echo "Number already exists, skipping."
+    else
+      echo "$NUMBER" >> VologdaSpamDB.csv
+      echo "Number added."
 
-            # Заменяем исходный файл отсортированным
-            mv tmp.csv VologdaSpamDB.csv
-          fi
-
+      # Сортировка с сохранением заголовка
+      head -n 1 VologdaSpamDB.csv > tmp.csv
+      tail -n +2 VologdaSpamDB.csv | sort -V >> tmp.csv
+      mv tmp.csv VologdaSpamDB.csv
+      echo "File sorted."
+    fi
       - name: Commit and push
         run: |
           git config user.name "github-actions[bot]"
