@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       phone_number:
-        description: 'The spam phone number to append (e.g. +78202519863)'
+        description: 'The spam phone number to append'
         required: true
         type: string
 
